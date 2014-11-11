@@ -16,6 +16,7 @@
 #define COMPAT_INL_H_  // NOLINT(build/header_guard)
 
 #include "compat.h"
+#include <utility>
 
 namespace compat {
 
@@ -34,13 +35,17 @@ inline void Use(const T&) {}
 
 template <typename T>
 class HasGetConstructorMethod {
+  typedef char pass;
+  typedef char fail[2];
+
   template <typename U>
-  static int16_t M(int (*)[sizeof(&U::GetConstructor)]);
-  template <typename U>
-  static int32_t M(...);
+  static auto test(void*) -> decltype(std::declval<U>().GetConstructor(), pass{});
+
+  template <typename>
+  static auto test(...) -> fail&;
 
  public:
-  static const bool value = (sizeof(M<T>(0)) == sizeof(int16_t));
+  static const bool value = sizeof(test<T>(0)) == sizeof(pass);
 };
 
 // V8 doesn't export a version macro that we can #ifdef on so we apply some
