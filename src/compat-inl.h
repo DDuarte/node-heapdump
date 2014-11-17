@@ -16,7 +16,6 @@
 #define COMPAT_INL_H_  // NOLINT(build/header_guard)
 
 #include "compat.h"
-#include <utility>
 
 namespace compat {
 
@@ -35,17 +34,21 @@ inline void Use(const T&) {}
 
 template <typename T>
 class HasGetConstructorMethod {
-  typedef char pass;
-  typedef char fail[2];
-
+#if defined(_MSC_VER) && _MSC_VER < 1800
+ public:
+  // VS before 2013 doesn't handle SFINAE.  Because V8 3.29 does not compile
+  // with older VS versions, if the compiler is not at least VS 2013, we know
+  // that we are building against V8 3.28 or older.
+  static const bool value = true;
+#else
   template <typename U>
-  static auto test(void*) -> decltype(std::declval<U>().GetConstructor(), pass{});
-
-  template <typename>
-  static auto test(...) -> fail&;
+  static int16_t M(int (*)[sizeof(&U::GetConstructor)]);
+  template <typename U>
+  static int32_t M(...);
 
  public:
-  static const bool value = sizeof(test<T>(0)) == sizeof(pass);
+  static const bool value = (sizeof(M<T>(0)) == sizeof(int16_t));
+#endif
 };
 
 // V8 doesn't export a version macro that we can #ifdef on so we apply some

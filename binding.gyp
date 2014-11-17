@@ -23,9 +23,6 @@
         'src/heapdump-win32.h',
         'src/heapdump.cc',
       ],
-      "cflags": [
-        "-std=c++11"
-      ]
     }
   ]
 }
