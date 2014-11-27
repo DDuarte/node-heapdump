@@ -34,11 +34,8 @@ inline void Use(const T&) {}
 
 template <typename T>
 class HasGetConstructorMethod {
-#if defined(_MSC_VER) && _MSC_VER < 1800
+#if defined(_MSC_VER)
  public:
-  // VS before 2013 doesn't handle SFINAE.  Because V8 3.29 does not compile
-  // with older VS versions, if the compiler is not at least VS 2013, we know
-  // that we are building against V8 3.28 or older.
   static const bool value = true;
 #else
   template <typename U>
